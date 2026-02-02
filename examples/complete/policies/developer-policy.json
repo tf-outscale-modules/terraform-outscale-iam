@@ -1,0 +1,29 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "fcu:*",
+        "lbu:*",
+        "eim:GetUser",
+        "eim:ListUsers",
+        "eim:GetGroup",
+        "eim:ListGroups"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Deny",
+      "Action": [
+        "eim:CreateUser",
+        "eim:DeleteUser",
+        "eim:CreateGroup",
+        "eim:DeleteGroup",
+        "eim:CreatePolicy",
+        "eim:DeletePolicy"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
