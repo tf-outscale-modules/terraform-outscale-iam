@@ -26,7 +26,7 @@ terraform {
     region         = "eu-west-2"
     encrypt        = true
     dynamodb_table = "terraform-locks"
-    
+
     # For Outscale OSU (Object Storage Unit)
     endpoint                    = "https://osu.eu-west-2.outscale.com"
     skip_credentials_validation = true
@@ -113,7 +113,7 @@ Separate IAM resources by environment:
 ```hcl
 module "iam_prod" {
   source = "path/to/outscale-iam"
-  
+
   users = {
     deployer = {
       user_name = "prod-deployer"
@@ -124,7 +124,7 @@ module "iam_prod" {
 
 module "iam_staging" {
   source = "path/to/outscale-iam"
-  
+
   users = {
     deployer = {
       user_name = "staging-deployer"

@@ -185,7 +185,11 @@ module "iam" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_outscale"></a> [outscale](#provider\_outscale) | ~> 1.3 |
+| <a name="provider_outscale"></a> [outscale](#provider\_outscale) | 1.3.2 |
+
+## Modules
+
+No modules.
 
 ## Resources
 
@@ -201,16 +205,16 @@ module "iam" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_access_keys"></a> [access\_keys](#input\_access\_keys) | Map of access keys to create. If user\_name is omitted, the key is created for the caller. | <pre>map(object({<br>    user_name       = optional(string)<br>    state           = optional(string, "ACTIVE")<br>    expiration_date = optional(string)<br>  }))</pre> | `{}` | no |
+| <a name="input_access_keys"></a> [access\_keys](#input\_access\_keys) | Map of access keys to create. If user\_name is omitted, the key is created for the caller. | <pre>map(object({<br/>    user_name       = optional(string)<br/>    state           = optional(string, "ACTIVE")<br/>    expiration_date = optional(string)<br/>  }))</pre> | `{}` | no |
 | <a name="input_create_access_keys"></a> [create\_access\_keys](#input\_create\_access\_keys) | Whether to create access keys | `bool` | `true` | no |
 | <a name="input_create_groups"></a> [create\_groups](#input\_create\_groups) | Whether to create user groups | `bool` | `true` | no |
 | <a name="input_create_policies"></a> [create\_policies](#input\_create\_policies) | Whether to create managed policies | `bool` | `true` | no |
 | <a name="input_create_policy_versions"></a> [create\_policy\_versions](#input\_create\_policy\_versions) | Whether to create policy versions | `bool` | `true` | no |
 | <a name="input_create_users"></a> [create\_users](#input\_create\_users) | Whether to create EIM users | `bool` | `true` | no |
-| <a name="input_groups"></a> [groups](#input\_groups) | Map of user groups to create. Groups can contain users and have policies attached. | <pre>map(object({<br>    user_group_name = string<br>    path            = optional(string, "/")<br>    users = optional(list(object({<br>      user_name = string<br>      path      = optional(string)<br>    })), [])<br>    policies = optional(list(object({<br>      policy_orn         = string<br>      default_version_id = optional(string)<br>    })), [])<br>  }))</pre> | `{}` | no |
-| <a name="input_policies"></a> [policies](#input\_policies) | Map of managed policies to create. The document should be a valid JSON policy string. | <pre>map(object({<br>    policy_name = string<br>    document    = string<br>    description = optional(string)<br>    path        = optional(string, "/")<br>  }))</pre> | `{}` | no |
-| <a name="input_policy_versions"></a> [policy\_versions](#input\_policy\_versions) | Map of policy versions to create. Used to add additional versions to existing policies. | <pre>map(object({<br>    policy_orn     = string<br>    document       = string<br>    set_as_default = optional(bool, false)<br>  }))</pre> | `{}` | no |
-| <a name="input_users"></a> [users](#input\_users) | Map of EIM users to create. Each user can have policies attached via the policies list. | <pre>map(object({<br>    user_name  = string<br>    user_email = optional(string)<br>    path       = optional(string, "/")<br>    policies = optional(list(object({<br>      policy_orn         = string<br>      default_version_id = optional(string)<br>    })), [])<br>  }))</pre> | `{}` | no |
+| <a name="input_groups"></a> [groups](#input\_groups) | Map of user groups to create. Groups can contain users and have policies attached. | <pre>map(object({<br/>    user_group_name = string<br/>    path            = optional(string, "/")<br/>    users = optional(list(object({<br/>      user_name = string<br/>      path      = optional(string)<br/>    })), [])<br/>    policies = optional(list(object({<br/>      policy_orn         = string<br/>      default_version_id = optional(string)<br/>    })), [])<br/>  }))</pre> | `{}` | no |
+| <a name="input_policies"></a> [policies](#input\_policies) | Map of managed policies to create. The document should be a valid JSON policy string. | <pre>map(object({<br/>    policy_name = string<br/>    document    = string<br/>    description = optional(string)<br/>    path        = optional(string, "/")<br/>  }))</pre> | `{}` | no |
+| <a name="input_policy_versions"></a> [policy\_versions](#input\_policy\_versions) | Map of policy versions to create. Used to add additional versions to existing policies. | <pre>map(object({<br/>    policy_orn     = string<br/>    document       = string<br/>    set_as_default = optional(bool, false)<br/>  }))</pre> | `{}` | no |
+| <a name="input_users"></a> [users](#input\_users) | Map of EIM users to create. Each user can have policies attached via the policies list. | <pre>map(object({<br/>    user_name  = string<br/>    user_email = optional(string)<br/>    path       = optional(string, "/")<br/>    policies = optional(list(object({<br/>      policy_orn         = string<br/>      default_version_id = optional(string)<br/>    })), [])<br/>  }))</pre> | `{}` | no |
 
 ## Outputs
 

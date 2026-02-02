@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Conditional Creation**: Toggle resource creation with boolean flags
   - `create_users`, `create_groups`, `create_policies`, `create_access_keys`, `create_policy_versions`
 - **Map-based Resources**: Use meaningful keys for stable state management
-- **Comprehensive Outputs**: 
+- **Comprehensive Outputs**:
   - Full resource attributes for users, groups, policies, policy versions, access keys
   - Helper outputs: `user_ids`, `user_names`, `group_orns`, `policy_orns`, `access_key_ids`
   - Sensitive marking for `access_keys` output
