@@ -58,7 +58,7 @@ Policies are attached within the user/group resource definition rather than as s
 resource "outscale_user" "this" {
   for_each   = var.users
   user_name  = each.value.user_name
-  
+
   dynamic "policy" {
     for_each = lookup(each.value, "policies", [])
     content {
@@ -259,14 +259,14 @@ variable "access_keys" {
 ```hcl
 variable "users" {
   # ... type definition ...
-  
+
   validation {
     condition = alltrue([
       for k, v in var.users : can(regex("^[a-zA-Z0-9+=,.@_-]{1,64}$", v.user_name))
     ])
     error_message = "User names must be 1-64 characters: alphanumeric, +, =, ,, ., @, -, _"
   }
-  
+
   validation {
     condition = alltrue([
       for k, v in var.users : v.path == "/" || can(regex("^/([a-zA-Z0-9_]+/)+$", v.path))
@@ -277,7 +277,7 @@ variable "users" {
 
 variable "access_keys" {
   # ... type definition ...
-  
+
   validation {
     condition = alltrue([
       for k, v in var.access_keys : contains(["ACTIVE", "INACTIVE"], v.state)
