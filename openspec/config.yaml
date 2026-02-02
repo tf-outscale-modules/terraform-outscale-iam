@@ -1,0 +1,33 @@
+schema: spec-driven
+
+context: |
+  Language: English (en-en)
+  All artifacts must be written in English.
+  This is a Terraform Module.
+  This module must be compatible with OpenTofu and Terraform.
+  This module must be production level.
+  This module must be secure by design with the highest level of security.
+  This module must include a complete example to test all features.
+  This module must be well documented.
+  This module should create multiple resources of each type from a single module call, of course when possible and take sens.
+  Verify all terraform providers docs and specification for perfect working code.
+  Always fix versions (major and minor versions are fix and only patch version that is upgradable)
+
+
+rules:
+  # proposal:
+  #   - Inclure un plan de rollback
+  #   - Identifier les équipes impactées
+  #   - Lister les risques + mitigation
+
+  # specs:
+  #   - Utiliser le format Given/When/Then pour les comportements
+  #   - Référencer les patterns existants avant d’en inventer de nouveaux
+
+  design:
+    - Put any required design to enhanced the documentation.
+
+  tasks:
+    - Break down into small, testable tasks
+    - Each task must have a clear “done” criterion
+    - All must be tested with the complete example in folder 'examples'.
