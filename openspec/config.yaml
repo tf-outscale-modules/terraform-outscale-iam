@@ -3,31 +3,117 @@ schema: spec-driven
 context: |
   Language: English (en-en)
   All artifacts must be written in English.
-  This is a Terraform Module.
-  This module must be compatible with OpenTofu and Terraform.
-  This module must be production level.
-  This module must be secure by design with the highest level of security.
-  This module must include a complete example to test all features.
-  This module must be well documented.
-  This module should create multiple resources of each type from a single module call, of course when possible and take sens.
-  Verify all terraform providers docs and specification for perfect working code.
-  Always fix versions (major and minor versions are fix and only patch version that is upgradable)
 
+  ## Project Type
+  This is a Terraform Module for cloud infrastructure.
+  - Must be compatible with OpenTofu and Terraform
+  - Must be production-level quality
+  - Must be secure by design with highest security standards
+  - Must include complete examples to test all features
+  - Must be well documented
+
+  ## Module Standards
+
+  ### File Structure
+  - MUST have: versions.tf, variables.tf, outputs.tf, main.tf, README.md
+  - SHOULD have: CHANGELOG.md, SECURITY.md (for IAM/auth), TESTING.md
+  - MAY have: locals.tf (if needed), data.tf (only if data sources needed - no empty files)
+  - MUST have: examples/complete/, examples/minimal/
+  - Examples must be independently runnable (own versions.tf, variables.tf)
+
+  ### Variables
+  - Use snake_case for all names
+  - Use plural names for collections (users, groups, policies)
+  - Prefix boolean toggles with create_, enable_, or is_
+  - Always specify explicit types (no any type)
+  - Use map(object()) over list(object()) for stable state
+  - Add validation blocks with helpful error messages
+  - Every variable MUST have a description
+
+  ### Outputs
+  - Use snake_case, plural for collections
+  - Suffix IDs with _ids, ORNs with _orns
+  - Mark secrets as sensitive = true
+  - Return empty maps/lists when resources not created (not null)
+  - Every output MUST have a description
+
+  ### Resources
+  - Use "this" as resource name for primary resources
+  - Use for_each with maps for predictable addressing
+  - Support create_* variables: for_each = var.create_X ? var.X : {}
+  - Use dynamic blocks for optional nested configurations
+  - Use depends_on only when implicit dependencies insufficient
+
+  ### Providers
+  - Use pessimistic constraint ~> for versions (~> 1.3)
+  - Specify minimum terraform version (>= 1.10.0)
+  - Do NOT commit .terraform.lock.hcl (causes CI inconsistencies)
+  - Never hardcode provider configuration in modules
+
+  ### Security
+  - Never expose secrets without sensitive = true
+  - Document that secrets are stored in state
+  - Recommend encrypted state backends
+  - Document principle of least privilege
+  - Provide restrictive example policies, not just admin
+
+  ### Documentation
+  - README: badges, features, requirements, usage, security, limitations
+  - Use terraform-docs with BEGIN_TF_DOCS/END_TF_DOCS markers
+  - Run terraform-docs without lock file for consistent CI output
+  - Examples must be copy-paste ready with comments
+
+  ### Testing
+  - Run terraform fmt -recursive before commit
+  - Run terraform validate on module and all examples
+  - Run tflint with recommended preset
+  - All pre-commit hooks must pass
+  - Test examples/minimal and examples/complete
+  - Perform full apply/destroy cycle before release
+
+  ### Compatibility
+  - Test with both Terraform and OpenTofu
+  - Use features available in minimum supported version
+  - Verify all provider docs for correct attribute names
 
 rules:
-  # proposal:
-  #   - Inclure un plan de rollback
-  #   - Identifier les équipes impactées
-  #   - Lister les risques + mitigation
+  proposal:
+    - Include clear problem statement and business justification
+    - List all affected resources and their relationships
+    - Identify breaking changes and migration path if any
+    - Include rollback strategy for critical changes
+    - Reference official provider documentation URLs
+    - List known limitations of the provider/API upfront
+    - Verify provider version and available resources before proposing
 
-  # specs:
-  #   - Utiliser le format Given/When/Then pour les comportements
-  #   - Référencer les patterns existants avant d’en inventer de nouveaux
+  specs:
+    - Use Given/When/Then format for all behavioral scenarios
+    - Each requirement MUST have at least one testable scenario
+    - Reference existing patterns before inventing new ones
+    - Document provider-specific limitations as NOTE annotations
+    - Include validation scenarios for all input constraints
+    - Include conditional creation scenarios (create_* flags)
+    - Include output scenarios documenting all exported attributes
+    - Mark sensitive outputs explicitly in scenarios
+    - Scenarios must be verifiable through terraform plan/apply
 
   design:
-    - Put any required design to enhanced the documentation.
+    - Document all provider resource references with links to official docs
+    - Verify each resource attribute exists in the actual provider version
+    - Document which attributes are computed vs configurable
+    - Include resource dependency graph when resources reference each other
+    - Document any workarounds for provider limitations
+    - Specify exact provider version constraints verified against
+    - List all files to be created/modified with their purpose
+    - Include variable type definitions with validation rules
+    - Include output definitions with sensitivity marking
 
   tasks:
-    - Break down into small, testable tasks
-    - Each task must have a clear “done” criterion
-    - All must be tested with the complete example in folder 'examples'.
+    - Break down into small, testable tasks (max 30 min each)
+    - Each task must have a clear "done" criterion
+    - Group tasks by file or logical component
+    - Include validation tasks after each resource implementation
+    - All must be tested with examples/complete and examples/minimal
+    - Include documentation tasks as explicit items
+    - End with pre-commit validation task
+    - End with full integration test task (plan + apply + destroy)
