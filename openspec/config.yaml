@@ -4,6 +4,10 @@ context: |
   Language: English (en-en)
   All artifacts must be written in English.
 
+
+  ## Project Purpose
+  This project is a Terraform Module for managing Outscale IAM (EIM - External Identity Management) resources including users, groups, policies, and access keys.
+
   ## Project Type
   This is a Terraform Module for cloud infrastructure.
   - Must be compatible with OpenTofu and Terraform
