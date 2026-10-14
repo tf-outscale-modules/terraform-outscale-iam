@@ -147,11 +147,11 @@ Never hardcode credentials in CI/CD pipelines:
 ```yaml
 # Good: Use CI/CD secrets management
 variables:
-  OUTSCALE_ACCESSKEYID: $OUTSCALE_ACCESS_KEY  # From CI secrets
-  OUTSCALE_SECRETKEYID: $OUTSCALE_SECRET_KEY  # From CI secrets
+  OSC_ACCESS_KEY: $OUTSCALE_ACCESS_KEY  # From CI secrets
+  OSC_SECRET_KEY: $OUTSCALE_SECRET_KEY  # From CI secrets
 
 # Bad: Hardcoded values
-# OUTSCALE_ACCESSKEYID: "AKIAXXXXXXXX"  # NEVER DO THIS
+# OSC_ACCESS_KEY: "AKIAXXXXXXXX"  # NEVER DO THIS
 ```
 
 ## Sensitive Outputs
