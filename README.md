@@ -22,7 +22,7 @@ A production-ready Terraform module for creating and managing **Outscale EIM (Ex
 | Name | Version |
 |------|---------|
 | [terraform](#requirement\_terraform) | >= 1.10.0 |
-| [outscale](#requirement\_outscale) | ~> 1.3 |
+| [outscale](#requirement\_outscale) | ~> 1.8 |
 
 ## Usage
 
@@ -179,13 +179,13 @@ module "iam" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.10.0 |
-| <a name="requirement_outscale"></a> [outscale](#requirement\_outscale) | ~> 1.3 |
+| <a name="requirement_outscale"></a> [outscale](#requirement\_outscale) | ~> 1.8 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_outscale"></a> [outscale](#provider\_outscale) | ~> 1.3 |
+| <a name="provider_outscale"></a> [outscale](#provider\_outscale) | ~> 1.8 |
 
 ## Modules
 
