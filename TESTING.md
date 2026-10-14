@@ -7,9 +7,9 @@ This document describes how to test the Outscale IAM Terraform module.
 1. **Outscale Account**: You need access to an Outscale account
 2. **Access Keys**: API credentials configured via environment variables:
    ```bash
-   export OUTSCALE_ACCESSKEYID="your-access-key-id"
-   export OUTSCALE_SECRETKEYID="your-secret-key-id"
-   export OUTSCALE_REGION="eu-west-2"  # or your preferred region
+   export OSC_ACCESS_KEY="your-access-key-id"
+   export OSC_SECRET_KEY="your-secret-key-id"
+   export OSC_REGION="eu-west-2"  # or your preferred region
    ```
 3. **Terraform/OpenTofu**: Version >= 1.10.0
 
@@ -167,9 +167,9 @@ tofu destroy
 
 Set the required environment variables:
 ```bash
-export OUTSCALE_ACCESSKEYID="..."
-export OUTSCALE_SECRETKEYID="..."
-export OUTSCALE_REGION="eu-west-2"
+export OSC_ACCESS_KEY="..."
+export OSC_SECRET_KEY="..."
+export OSC_REGION="eu-west-2"
 ```
 
 ### "User not found" for access keys
