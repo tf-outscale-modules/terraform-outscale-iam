@@ -175,7 +175,7 @@ run "ca_rejects_private_key" {
   command = plan
 
   variables {
-    cas = { corp = { ca_pem = "-----BEGIN CERTIFICATE-----\nMIIBplaceholder\n-----END CERTIFICATE-----\n-----BEGIN PRIVATE KEY-----\nx\n-----END PRIVATE KEY-----\n" } }
+    cas = { corp = { ca_pem = "-----BEGIN CERTIFICATE-----\nMIIBplaceholder\n-----END CERTIFICATE-----\n-----BEGIN TEST PRIVATE KEY-----\nx\n-----END TEST PRIVATE KEY-----\n" } }
   }
 
   expect_failures = [var.cas]
