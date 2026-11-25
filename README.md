@@ -14,6 +14,7 @@ A production-ready Terraform module for creating and managing **Outscale EIM (Ex
 - **Managed Policies**: Create custom policies with JSON documents and versioning support
 - **Policy Versions**: Manage multiple versions of policies with default selection
 - **Access Keys**: Create access keys with state management and expiration dates
+- **API Access Control** (opt-in): account-wide API access policy, API access rules and client Certificate Authorities
 - **Conditional Creation**: Toggle resource creation with boolean flags
 - **Map-based Resources**: Use meaningful keys for easy reference and stable state management
 
@@ -22,7 +23,16 @@ A production-ready Terraform module for creating and managing **Outscale EIM (Ex
 | Name | Version |
 |------|---------|
 | [terraform](#requirement\_terraform) | >= 1.10.0 |
-| [outscale](#requirement\_outscale) | ~> 1.8 |
+| [outscale](#requirement\_outscale) | ~> 1.9 |
+
+The provider floor is `~> 1.9` because `require_trusted_env_secure_mode` of `outscale_api_access_policy` first exists in provider v1.9.0 (module v2.0.0, a major release).
+
+### Compatibility
+
+| Module | Outscale provider | Terraform / OpenTofu | Examples applied on a real account |
+|--------|-------------------|----------------------|------------------------------------|
+| v2.x   | `~> 1.9`          | >= 1.10.0            | not yet recorded for v2.0.0 (validated and unit-tested only) |
+| v1.x   | `~> 1.8`          | >= 1.10.0            | see v1.x releases |
 
 ## Usage
 
@@ -144,6 +154,30 @@ module "iam" {
 }
 ```
 
+### API Access Control (opt-in)
+
+Nothing below is created unless you set the input. These settings are **account-wide** and can lock callers out of the API: read [SECURITY.md](SECURITY.md#api-access-control) first.
+
+```hcl
+module "iam" {
+  source = "path/to/outscale-iam"
+
+  cas = {
+    corp = { ca_pem = file("corp-ca.crt") } # public CA certificate, never a private key
+  }
+
+  api_access_rules = {
+    office = { ip_ranges = ["192.0.2.0/24"] } # include the address Terraform runs from
+    mtls   = { ca_keys = ["corp"] }
+  }
+
+  api_access_policy = {
+    max_access_key_expiration_seconds = 31536000 # 1 year
+    require_trusted_env               = false
+  }
+}
+```
+
 ## Security Considerations
 
 > **For comprehensive security guidance, see [SECURITY.md](SECURITY.md).**
@@ -159,6 +193,8 @@ module "iam" {
 5. **Sensitive Outputs**: The `access_keys` output is marked as sensitive. Use `nonsensitive()` only when absolutely necessary.
 
 ## Known Limitations
+
+0. **API access policy is an account-wide singleton**: the provider does not reset it on destroy. Removing `api_access_policy` (or `tofu destroy`) leaves it active; apply `max_access_key_expiration_seconds = 0` and `require_trusted_env = false` first. API access rule sets (`ip_ranges`, `ca_ids`, `cns`) cannot be cleared by omission, and `ip_ranges` must be canonical CIDRs.
 
 1. **User ORN Not Available**: The Outscale provider's `outscale_user` resource does not export the user's ORN. If you need the user ORN for policy attachments, you must construct it manually:
    ```
@@ -179,13 +215,13 @@ module "iam" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.10.0 |
-| <a name="requirement_outscale"></a> [outscale](#requirement\_outscale) | ~> 1.8 |
+| <a name="requirement_outscale"></a> [outscale](#requirement\_outscale) | ~> 1.9 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_outscale"></a> [outscale](#provider\_outscale) | ~> 1.8 |
+| <a name="provider_outscale"></a> [outscale](#provider\_outscale) | ~> 1.9 |
 
 ## Modules
 
@@ -196,6 +232,9 @@ No modules.
 | Name | Type |
 |------|------|
 | [outscale_access_key.this](https://registry.terraform.io/providers/outscale/outscale/latest/docs/resources/access_key) | resource |
+| [outscale_api_access_policy.this](https://registry.terraform.io/providers/outscale/outscale/latest/docs/resources/api_access_policy) | resource |
+| [outscale_api_access_rule.this](https://registry.terraform.io/providers/outscale/outscale/latest/docs/resources/api_access_rule) | resource |
+| [outscale_ca.this](https://registry.terraform.io/providers/outscale/outscale/latest/docs/resources/ca) | resource |
 | [outscale_policy.this](https://registry.terraform.io/providers/outscale/outscale/latest/docs/resources/policy) | resource |
 | [outscale_policy_version.this](https://registry.terraform.io/providers/outscale/outscale/latest/docs/resources/policy_version) | resource |
 | [outscale_user.this](https://registry.terraform.io/providers/outscale/outscale/latest/docs/resources/user) | resource |
@@ -206,7 +245,13 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_access_keys"></a> [access\_keys](#input\_access\_keys) | Map of access keys to create. If user\_name is omitted, the key is created for the caller. | <pre>map(object({<br/>    user_name       = optional(string)<br/>    state           = optional(string, "ACTIVE")<br/>    expiration_date = optional(string)<br/>  }))</pre> | `{}` | no |
+| <a name="input_api_access_policy"></a> [api\_access\_policy](#input\_api\_access\_policy) | Account-wide API access policy (a singleton: one per Outscale account). null leaves the policy untouched. WARNING: removing this input later does NOT reset the policy on the server; first apply max\_access\_key\_expiration\_seconds = 0 and require\_trusted\_env = false. A trusted session needs an expiration date on every access key and a CA on every API access rule, and can lock callers out. | <pre>object({<br/>    max_access_key_expiration_seconds = number<br/>    require_trusted_env               = bool<br/>    require_trusted_env_secure_mode   = optional(bool)<br/>  })</pre> | `null` | no |
+| <a name="input_api_access_rules"></a> [api\_access\_rules](#input\_api\_access\_rules) | Map of API access rules. ip\_ranges are canonical CIDRs (for example 192.0.2.0/24 or 192.0.2.5/32). CAs are referenced by ca\_keys (keys of var.cas) and/or ca\_ids (existing CA IDs); cns requires a CA. Applying a rule restricts API calls to the listed sources: include the address Terraform runs from. Unset sets keep their server value (they cannot be cleared by omission). | <pre>map(object({<br/>    description = optional(string)<br/>    ip_ranges   = optional(set(string), [])<br/>    ca_ids      = optional(set(string), [])<br/>    ca_keys     = optional(set(string), [])<br/>    cns         = optional(set(string), [])<br/>  }))</pre> | `{}` | no |
+| <a name="input_cas"></a> [cas](#input\_cas) | Map of client Certificate Authorities for API access rules. ca\_pem is the PUBLIC CA certificate in PEM format (not a secret, so not sensitive); never pass a private key. Changing ca\_pem replaces the CA. | <pre>map(object({<br/>    ca_pem      = string<br/>    description = optional(string)<br/>  }))</pre> | `{}` | no |
 | <a name="input_create_access_keys"></a> [create\_access\_keys](#input\_create\_access\_keys) | Whether to create access keys | `bool` | `true` | no |
+| <a name="input_create_api_access_policy"></a> [create\_api\_access\_policy](#input\_create\_api\_access\_policy) | Whether to manage the account API access policy when api\_access\_policy is set | `bool` | `true` | no |
+| <a name="input_create_api_access_rules"></a> [create\_api\_access\_rules](#input\_create\_api\_access\_rules) | Whether to create API access rules | `bool` | `true` | no |
+| <a name="input_create_cas"></a> [create\_cas](#input\_create\_cas) | Whether to create Certificate Authorities. Keep true when api\_access\_rules reference them through ca\_keys | `bool` | `true` | no |
 | <a name="input_create_groups"></a> [create\_groups](#input\_create\_groups) | Whether to create user groups | `bool` | `true` | no |
 | <a name="input_create_policies"></a> [create\_policies](#input\_create\_policies) | Whether to create managed policies | `bool` | `true` | no |
 | <a name="input_create_policy_versions"></a> [create\_policy\_versions](#input\_create\_policy\_versions) | Whether to create policy versions | `bool` | `true` | no |
@@ -222,6 +267,11 @@ No modules.
 |------|-------------|
 | <a name="output_access_key_ids"></a> [access\_key\_ids](#output\_access\_key\_ids) | Map of access key keys to access key IDs (non-sensitive) |
 | <a name="output_access_keys"></a> [access\_keys](#output\_access\_keys) | Map of created access keys with their attributes (sensitive) |
+| <a name="output_api_access_policy"></a> [api\_access\_policy](#output\_api\_access\_policy) | API access policy as applied, keyed 'this'; empty map when the policy is not managed |
+| <a name="output_api_access_rule_ids"></a> [api\_access\_rule\_ids](#output\_api\_access\_rule\_ids) | Map of API access rule keys to rule IDs |
+| <a name="output_api_access_rules"></a> [api\_access\_rules](#output\_api\_access\_rules) | Map of created API access rules with their attributes |
+| <a name="output_ca_ids"></a> [ca\_ids](#output\_ca\_ids) | Map of CA keys to CA IDs |
+| <a name="output_cas"></a> [cas](#output\_cas) | Map of created Certificate Authorities with their attributes (public data) |
 | <a name="output_group_orns"></a> [group\_orns](#output\_group\_orns) | Map of group keys to group ORNs |
 | <a name="output_groups"></a> [groups](#output\_groups) | Map of created user groups with their attributes |
 | <a name="output_policies"></a> [policies](#output\_policies) | Map of created policies with their attributes |
