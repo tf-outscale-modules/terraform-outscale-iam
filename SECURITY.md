@@ -169,6 +169,44 @@ output "service_key" {
 # terraform output -json access_keys
 ```
 
+## API Access Control
+
+The optional `api_access_policy`, `api_access_rules` and `cas` inputs change **account-wide** API access. Nothing is created unless they are set.
+
+### Scope and persistence
+
+- The API access policy is a singleton per Outscale account. Manage it from one stack only.
+- The provider's delete for `outscale_api_access_policy` does nothing: `tofu destroy`, or removing `api_access_policy`, leaves the policy active on the server. To disable it, first apply `max_access_key_expiration_seconds = 0` and `require_trusted_env = false`, then remove the input.
+
+### Lock-out scenarios
+
+| Scenario | Effect | Mitigation |
+|----------|--------|------------|
+| `max_access_key_expiration_seconds > 0` | Every access key needs an expiration date within the cap; the cap must exceed the remaining life of every existing key | Set `expiration_date` on all keys; the module warns about its own keys (`check`), not unmanaged ones |
+| `require_trusted_env = true` | Trusted session: every API access rule needs a CA, users need trusted access keys and MFA on Cockpit v2 | Add a CA to every rule first; apply the policy last, with a trusted key; keep a break-glass path |
+| `require_trusted_env_secure_mode = true` | Also restricts CLI use of certain API calls | Test in a non-production account |
+| Rules with `ip_ranges` | Calls from outside every rule are refused, including Terraform's own | Include the runner and operator egress CIDRs in the first rule; the module cannot know them |
+
+Apply order: CAs, then rules, then the policy, one change per apply, with an independent session kept open.
+
+### Recovery
+
+**Recovery path unverified.** Outscale documents `UpdateApiAccessPolicy` with login/password authentication, but whether those calls bypass API access rules and trusted sessions has not been verified against a real account. Until it is, contact Outscale support if a lock-out occurs.
+
+### Certificate Authorities and state
+
+`ca_pem` is the **public** certificate of the CA that signs API client certificates. It is not a secret, so the input is not `sensitive`, and the provider offers no write-only argument for it. The module rejects values containing `PRIVATE KEY` so a private key cannot be passed by mistake.
+
+| Lands in state | Sensitivity | Mitigation |
+|----------------|-------------|------------|
+| CA certificate (PEM) and fingerprint | public | none needed |
+| API access rule IP ranges and CNs | network topology | encrypted state, restricted access |
+| API access policy values | low | encrypted state |
+
+### Least privilege
+
+The identity running Terraform needs the EIM permissions for the API access policy, API access rule and CA actions only when these inputs are used (see https://docs.outscale.com/api: `ReadApiAccessPolicy`, `UpdateApiAccessPolicy`, `CreateApiAccessRule`, `ReadApiAccessRules`, `UpdateApiAccessRule`, `DeleteApiAccessRule`, `CreateCa`, `ReadCas`, `UpdateCa`, `DeleteCa`). These 10 action names were confirmed against the API reference; a least-privilege run with a token limited to them has not yet been performed.
+
 ## Known Security Considerations
 
 | Concern | Mitigation |
@@ -183,7 +221,8 @@ output "service_key" {
 
 | Version | Security Updates |
 |---------|------------------|
-| 1.x     | Active support   |
+| 2.x     | Active support   |
+| 1.x     | Security fixes only |
 | < 1.0   | No longer supported |
 
 ## Security Checklist

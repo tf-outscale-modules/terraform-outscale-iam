@@ -110,3 +110,60 @@ output "access_key_ids" {
   description = "Map of access key keys to access key IDs (non-sensitive)"
   value       = { for k, v in outscale_access_key.this : k => v.access_key_id }
 }
+
+################################################################################
+# Certificate Authority Outputs
+################################################################################
+
+output "cas" {
+  description = "Map of created Certificate Authorities with their attributes (public data)"
+  value = {
+    for k, v in outscale_ca.this : k => {
+      ca_id          = v.ca_id
+      ca_fingerprint = v.ca_fingerprint
+      description    = v.description
+    }
+  }
+}
+
+output "ca_ids" {
+  description = "Map of CA keys to CA IDs"
+  value       = { for k, v in outscale_ca.this : k => v.ca_id }
+}
+
+################################################################################
+# API Access Rule Outputs
+################################################################################
+
+output "api_access_rules" {
+  description = "Map of created API access rules with their attributes"
+  value = {
+    for k, v in outscale_api_access_rule.this : k => {
+      api_access_rule_id = v.api_access_rule_id
+      ip_ranges          = v.ip_ranges
+      ca_ids             = v.ca_ids
+      cns                = v.cns
+      description        = v.description
+    }
+  }
+}
+
+output "api_access_rule_ids" {
+  description = "Map of API access rule keys to rule IDs"
+  value       = { for k, v in outscale_api_access_rule.this : k => v.api_access_rule_id }
+}
+
+################################################################################
+# API Access Policy Output
+################################################################################
+
+output "api_access_policy" {
+  description = "API access policy as applied, keyed 'this'; empty map when the policy is not managed"
+  value = {
+    for k, v in outscale_api_access_policy.this : k => {
+      max_access_key_expiration_seconds = v.max_access_key_expiration_seconds
+      require_trusted_env               = v.require_trusted_env
+      require_trusted_env_secure_mode   = v.require_trusted_env_secure_mode
+    }
+  }
+}

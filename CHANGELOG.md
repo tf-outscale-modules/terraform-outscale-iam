@@ -2,59 +2,79 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [2.0.0] - 2026-11-25
+- Fix the CA private-key test fixture flagged by the detect-private-key hook
 
-## [Unreleased]
+The negative test used a literal private-key PEM header, which the pre-commit hook rejects in CI. A TEST-prefixed header still trips the module validation.
+- Add API access policy, rules and CA management (requires provider ~> 1.9, major)
 
+Add opt-in inputs api_access_policy, api_access_rules and cas, wrapping
+outscale_api_access_policy, outscale_api_access_rule and outscale_ca, with
+validation blocks, lock-out check blocks, outputs, plan-mode unit tests
+(tests/main.tftest.hcl), an updated complete example and SECURITY.md guidance.
+Nothing is created unless the new inputs are set. CA and rules were verified
+against a real account (second plan empty); the policy was plan-only.
+
+Upgrade notes (major, v2.0.0): the outscale provider floor is raised from
+~> 1.8 to ~> 1.9 because require_trusted_env_secure_mode exists only from
+provider v1.9.0. Bump the provider constraint and run tofu init -upgrade; no
+input, output or resource address changes, so the first plan is empty.
+Replacement warnings: changing a CA's ca_pem replaces the CA. The API access
+policy is account-wide and its provider delete is a no-op: removing
+api_access_policy does not reset it on the server (apply cap 0 and
+require_trusted_env false first). Rule sets cannot be cleared by omission.
+- chore(deps): upgrade outscale provider to ~> 1.8
+
+- Bump the outscale provider constraint to ~> 1.8 (module and examples).
+- docs: use OSC_ACCESS_KEY/OSC_SECRET_KEY/OSC_REGION; the legacy
+  OUTSCALE_* environment variables are ignored since provider 1.6.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+- Upgrade OpenSpec to 1.14.0 with Claude Code and OpenCode skills
+
+Pin @fission-ai/openspec 1.14.0 in mise.toml and regenerate the
+OpenSpec instruction files for Claude Code and OpenCode (skills
+delivery). Legacy opsx-* command files are removed in favor of skills.
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
+- Adds project purpose to config
+
+Adds a description of the project's purpose to the configuration file.
+
+This provides context for users and contributors, outlining the module's role in managing Outscale IAM resources.
+## [1.0.1] - 2026-02-02
+- Adds OpenSpec configuration file
+
+Adds a configuration file (`openspec/config.yaml`) to define standards and guidelines for Terraform module development.
+
+The configuration outlines requirements for file structure, variables, outputs, resources, providers, security, documentation, testing, and compatibility.
+
+It also specifies rules for proposals, specifications, design, and tasks related to module development.
 ## [1.0.0] - 2026-02-02
+- Updates outscale provider version constraint.
 
-### Added
+Relax the version constraint for the outscale provider in the terraform module.
 
-- Initial release of the Outscale IAM Terraform module
-- **EIM Users**: Create and manage users with configurable paths, emails, and policy attachments
-  - Input validation for user names (1-64 chars, alphanumeric + special chars)
-  - Input validation for paths (must begin and end with `/`)
-- **User Groups**: Organize users into groups with shared permissions
-  - Dynamic user membership via `user` blocks
-  - Dynamic policy attachment via `policy` blocks
-- **Managed Policies**: Create custom policies with JSON documents
-  - Policy name validation (1-128 chars)
-  - Support for policy descriptions
-  - Automatic version V1 creation
-- **Policy Versions**: Manage multiple versions of policies
-  - Support for `set_as_default` to activate new versions
-  - Dependency management on parent policy
-- **Access Keys**: Create access keys with state management and expiration
-  - Support for creating keys for self (caller) or specific users
-  - State management (ACTIVE/INACTIVE)
-  - Expiration date support (ISO 8601 format)
-  - Sensitive output handling
-- **Conditional Creation**: Toggle resource creation with boolean flags
-  - `create_users`, `create_groups`, `create_policies`, `create_access_keys`, `create_policy_versions`
-- **Map-based Resources**: Use meaningful keys for stable state management
-- **Comprehensive Outputs**:
-  - Full resource attributes for users, groups, policies, policy versions, access keys
-  - Helper outputs: `user_ids`, `user_names`, `group_orns`, `policy_orns`, `access_key_ids`
-  - Sensitive marking for `access_keys` output
-- **Documentation**:
-  - Complete README with usage examples
-  - TESTING.md with validation and integration test procedures
-  - SECURITY.md with production security guidelines
-- **Examples**:
-  - `examples/complete/` - Full-featured example with all resource types
-  - `examples/minimal/` - Minimal example with empty inputs
+This allows for more flexibility in version selection and enables the use of newer compatible versions.
+- Updates documentation and configurations
 
-### Security
+Corrects minor formatting issues in the README and other documentation files,
+including line break inconsistencies and a missing newline in config.yaml.
 
-- Access key secret keys are marked as sensitive in outputs
-- Documentation includes state file encryption recommendations
-- Input validation prevents common misconfigurations
+Updates the outscale provider version in the README.
+- Implements Outscale IAM Terraform module
 
-### Dependencies
+This commit introduces a fully functional Terraform module for managing Outscale IAM (EIM) resources.
 
-- Terraform >= 1.10.0
-- Outscale Provider ~> 1.3
+The module allows users to create and manage EIM users, user groups, and managed policies, and access keys. It provides conditional resource creation, comprehensive outputs, and input validation for secure and flexible IAM management.
 
-[Unreleased]: https://gitlab.com/leminnov/terraform/modules/outscale-iam/-/compare/v1.0.0...HEAD
-[1.0.0]: https://gitlab.com/leminnov/terraform/modules/outscale-iam/-/releases/v1.0.0
+Includes complete documentation, examples, and testing guidelines.
+- Adds OpenSpec workflow commands
+
+Introduces a set of commands for managing OpenSpec workflows, including apply, archive, bulk archive, continue, explore, fast forward, new, sync, and verify.
+
+These commands facilitate the creation, implementation, and management of changes within a structured, artifact-driven approach.
+
+The changes introduce several new skills and workflows related to OpenSpec, expanding the capabilities for managing code changes and design specifications.
+- Initial commit
+
