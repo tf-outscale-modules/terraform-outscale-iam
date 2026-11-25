@@ -3,6 +3,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [2.0.0] - 2026-11-25
+- Fix the CA private-key test fixture flagged by the detect-private-key hook
+
+The negative test used a literal private-key PEM header, which the pre-commit hook rejects in CI. A TEST-prefixed header still trips the module validation.
 - Add API access policy, rules and CA management (requires provider ~> 1.9, major)
 
 Add opt-in inputs api_access_policy, api_access_rules and cas, wrapping
