@@ -86,6 +86,15 @@ tofu output access_key_ids
 tofu destroy -var="environment=test-..."
 ```
 
+## Unit Tests (No Account Required)
+
+```bash
+tofu init -backend=false
+tofu test
+```
+
+`tests/main.tftest.hcl` runs in plan mode with a mock provider. It covers opt-in behaviour, the `create_*` toggles, the `api_access_policy`, `api_access_rules` and `cas` validations (each rejected value has an `expect_failures` run), the `check` warnings and set-order independence.
+
 ## Test 4: Conditional Creation
 
 Test toggling resource types:

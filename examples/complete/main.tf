@@ -106,6 +106,37 @@ module "iam" {
     }
   }
 
+  # API access control (account-wide, opt-in). WARNING: these settings can lock
+  # callers out of the API. Review SECURITY.md ("API Access Control") first.
+
+  # Public CA certificate (never a private key) used by rules to verify client certificates.
+  cas = {
+    corp = {
+      ca_pem      = file("${path.module}/ca/example-ca.crt")
+      description = "${var.environment} example client CA"
+    }
+  }
+
+  api_access_rules = {
+    # Replace the documentation range with the egress addresses Terraform and your operators use.
+    office = {
+      description = "${var.environment} trusted source networks"
+      ip_ranges   = toset(var.api_access_ip_ranges)
+    }
+    mtls = {
+      description = "${var.environment} client certificates"
+      ca_keys     = ["corp"]
+    }
+  }
+
+  # Cap access-key lifetime to 1 year. Not a trusted session, so rules need no CA.
+  # Removing this block later does NOT reset the policy: first apply
+  # max_access_key_expiration_seconds = 0 and require_trusted_env = false.
+  api_access_policy = {
+    max_access_key_expiration_seconds = 31536000
+    require_trusted_env               = false
+  }
+
   # Policy versions are optional - use when you need to update a policy
   # policy_versions = {
   #   admin_v2 = {
@@ -159,4 +190,19 @@ output "access_keys" {
 output "access_key_ids" {
   description = "Access key IDs (non-sensitive)"
   value       = module.iam.access_key_ids
+}
+
+output "ca_ids" {
+  description = "Certificate Authority IDs"
+  value       = module.iam.ca_ids
+}
+
+output "api_access_rule_ids" {
+  description = "API access rule IDs"
+  value       = module.iam.api_access_rule_ids
+}
+
+output "api_access_policy" {
+  description = "API access policy as applied"
+  value       = module.iam.api_access_policy
 }
